@@ -11,7 +11,7 @@ go test .
 go test -cover .
 
 # test cover output file
-go test -coverprofile=app.out .
+go test -coverprofile=coverage.out .
 
 # see cover in html,the file has been existed
 go tool cover -html=coverage.out
