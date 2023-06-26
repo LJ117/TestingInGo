@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"io"
 	"os"
 	"strings"
@@ -88,4 +90,53 @@ func Test_intro(t *testing.T) {
 	if !strings.Contains(string(out), "Enter a whole number") {
 		t.Errorf("intro text not correct; got %s", string(out))
 	}
+}
+
+func Test_checkNumber(t *testing.T) {
+
+	checkNumberTests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{name: "empty", input: "", expected: "Please enter a whole number!"},
+		{name: "zero", input: "0", expected: "0 is not prime number, by the definition"},
+		{name: "one", input: "1", expected: "1 is not prime number, by the definition"},
+		{name: "two", input: "2", expected: "2 is a prime number!"},
+		{name: "three", input: "3", expected: "3 is a prime number!"},
+		{name: "negative", input: "-1", expected: "Negative numbers are not prime, by the definition"},
+		{name: "typed", input: "three", expected: "Please enter a whole number!"},
+		{name: "decimal", input: "1.1", expected: "Please enter a whole number!"},
+		{name: "quit", input: "q", expected: ""},
+		{name: "QUIT", input: "Q", expected: ""},
+		{name: "greek", input: "ëĘĖÊ", expected: "Please enter a whole number!"},
+	}
+
+	for _, e := range checkNumberTests {
+
+		input := strings.NewReader(e.input)
+		reader := bufio.NewScanner(input)
+
+		res, _ := checkNumbers(reader)
+
+		if !strings.EqualFold(e.expected, res) {
+			t.Errorf("%s: expected: %s ; but got %s", e.name, e.expected, res)
+
+		}
+	}
+}
+
+func Test_readUserInput(t *testing.T) {
+	// to test this function,we need a channel, and an instance of an io.Reader
+	doneChan := make(chan bool)
+	defer close(doneChan)
+
+	// create a reference to a bytes.Buffer
+	var stdin bytes.Buffer
+
+	// 模拟标准输入, 两次+
+	stdin.Write([]byte("1\nq\n"))
+	go readUserInput(&stdin, doneChan)
+	<-doneChan
+
 }
